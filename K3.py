@@ -17,4 +17,15 @@ class RMSNorm(nn.Module):
       def forward(self, x):
           norm = x.pow(2).mean(-1, keepdim = True)
           return x * torch.rsqrt(norm + self.eps) * self.weight
+
+class SwiGLUExpert(nn.Module):
+    def __init__(self , d_in , d_out, hidden_mult=2):
+        super().__init__()
+        h = d_in * hidden_mult
+        self.W_gate = nn.Linear(d_in, h , bias = False)
+        self.W_up = nn.Linear(d_in, h , bias = False)
+        self.W_down = nn.Linear(h , d_out, bias = False)
+
+    def forward(self , x):
+        return self.W_down(F.silu(self.W_gate(x)) * self.W_up(x))
           
