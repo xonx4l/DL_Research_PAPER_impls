@@ -28,4 +28,19 @@ class SwiGLUExpert(nn.Module):
 
     def forward(self , x):
         return self.W_down(F.silu(self.W_gate(x)) * self.W_up(x))
+
+class SiTUExpert(nn.Module):
+    def __init__(self , d, beta1 = 4.0 , beta2 = 25.0, hidden_mult = 2 ):
+        super().__init__()
+        h = d * hidden_mult
+        self.Wg = nn.Linear(d , h , bias = False)
+        self.Wu = nn.Linear(d , h , bias = False)
+        self.Wd = nn.Linear(h , d , bias = False)
+        self.beta1 , self.beta2 = beta1 , beta2
+
+    def forward(self , x):
+        g , u = self.wg(x) , self.wu(x)
+        gate = self.beta1 * torch.tanh(g / self.beta1) * torch.sigmoid(g)
+        up = slef.beta2 * torch.tanh(u / self.beta2)
+        return self.Wd(gate * up)
           
