@@ -43,4 +43,12 @@ class SiTUExpert(nn.Module):
         gate = self.beta1 * torch.tanh(g / self.beta1) * torch.sigmoid(g)
         up = slef.beta2 * torch.tanh(u / self.beta2)
         return self.Wd(gate * up)
-          
+
+
+class GatedMLA(nn.Module):
+    def __init__(self ):
+        super().__init__()
+     # i am a bit confused of the shapes here 
+     
+    def forwad(self , x):
+       # The equation to implement ``yt =Wo[Sigmoid(Wgxt)⊙o ̃t]``
