@@ -44,11 +44,32 @@ class SiTUExpert(nn.Module):
         up = slef.beta2 * torch.tanh(u / self.beta2)
         return self.Wd(gate * up)
 
-
+ # The equation to implement ``yt =Wo[Sigmoid(Wgxt)⊙o ̃t]``
 class GatedMLA(nn.Module):
-    def __init__(self ):
+    def __init__(self , d_model ,  n_heads, d_head):
         super().__init__()
-     # i am a bit confused of the shapes here 
-     
+        self.n_heads , self.d_head = n_heads , d_head
+        inner = n_heads * d_head
+        self.q = nn.Linear(d_model , inner , bias=False)
+        self.k = nn.Linear(d_model , inner , bias=False)
+        self.v = nn.Linear(d_model , inner , bias=False)
+        self.gate = nn.Linear(d_model , inner, bias=False)
+        self.out = nn.Linear(inner, d_model, bais=False)
+        self.scale = d_head ** -0.5
+        
     def forwad(self , x):
-       # The equation to implement ``yt =Wo[Sigmoid(Wgxt)⊙o ̃t]``
+        B , T , D = x.shape
+        H , DH = self.n_heads * self.d_head
+        q = self.q(x).view(B , T , H , DH).transpose(1,2)
+        k = self.k(x).view(B , T , H , DH).transpose(1,2)
+        v = self.v(x).view(B , T , H , DH).transpose(1,2)
+
+        attn = torch.einsum('bhtd , bhsd -> bhts' , q , k ) * self.scale
+        mask = torch.triu(torch.ones(T , T , device = x.device , dtype = torch.bool) , diagonal = 1)
+        attn =  attn.masked_fill(mask , float(-inf)).softmax(dim=-1)
+        o = torch.einsum('bhts, bhsd -> bhtd' , attn , v).transpose(1,2).reshape(B, T, H * DH)
+
+        gate = torch.sigmoid(self.gate(x))
+        return self.out(gate * o)
+       
+   
