@@ -71,5 +71,13 @@ class GatedMLA(nn.Module):
 
         gate = torch.sigmoid(self.gate(x))
         return self.out(gate * o)
+
+class ShortConv(nn.module):
+    def __init__(self, dim, kernel_size=4):
+        super().__init__()
+        self.kernel_size = kernel_size
+        self.conv = nn.Conv1d()
+        
+    def forward(self, x):
        
    
