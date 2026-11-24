@@ -76,8 +76,12 @@ class ShortConv(nn.Module):
     def __init__(self, dim, kernel_size=4):
         super().__init__()
         self.kernel_size = kernel_size
-        self.conv = nn.Conv1d()
+        self.conv = nn.Conv1d(dim , dim , Kernel_size, groups=dim , padding=0)
         
     def forward(self, x):
-       
+        B,T,D = x.shape
+        x = x.transpose(1,2)  #B,D,T
+        x = F.pad(x, (self.kernel_size -1 , 0))
+        x = self.conv(x)
+        return x.transpose(1,2)  #B , T , D
    
