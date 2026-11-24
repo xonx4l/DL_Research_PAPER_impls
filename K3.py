@@ -84,4 +84,10 @@ class ShortConv(nn.Module):
         x = F.pad(x, (self.kernel_size -1 , 0))
         x = self.conv(x)
         return x.transpose(1,2)  #B , T , D
+
+class StableLatentMOE(nn.Module):
+    def __init__(self, shared, routed, top_k):
+        super().__init__()
+
+    def forward(self, x):
    
